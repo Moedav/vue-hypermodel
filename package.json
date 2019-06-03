@@ -8,6 +8,15 @@
     "type": "git",
     "url": "https://github.com/Moedav/vue-hypermodel"
   },
+  "keywords": [
+    "vue",
+    "model",
+    "hateoas",
+    "hypermedia",
+    "vue-model",
+    "rest",
+    "api"
+  ],
   "devDependencies": {
     "@vue/cli-plugin-babel": "^3.8.0",
     "@vue/cli-plugin-eslint": "^3.8.0",
