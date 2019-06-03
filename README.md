@@ -4,6 +4,12 @@ Vue-hypermodel delivers you the possibility to transform the json you get from y
 
 
 ## Getting started
+first add package with yarn or npm
+```
+yarn add vue-hypermodel
+npm install vue-hypermodel
+```
+
 create vue.config.js file in main directory of your project with following content:
 
 ```javascript
