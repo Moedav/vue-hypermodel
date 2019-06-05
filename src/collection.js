@@ -55,11 +55,11 @@ export default class Collection extends Array {
     return {}
   }
 
-  async create (record, options) {
+  async post (record, options) {
     if (!this._model) {
       return {}
     }
-    const link = this._links[this._model.linkRels['create']]
+    const link = this._links[this._model.linkRels['post']]
     if (link) {
       link.name = this._model.name
       record = await this._store.create(link, record, null, Object.assign({
@@ -74,5 +74,20 @@ export default class Collection extends Array {
       return record
     }
     return {}
+  }
+
+  async get (relOrObj, model) {
+    let link = relOrObj
+    if (typeof link === 'string') {
+      link = this._links[link]
+    }
+    if (link) {
+      link.name = model
+      model = this._store._model(model)
+      const idx = this._store._getIndexOf(this, model, link)
+      if (idx !== -1) {
+        return this[idx]
+      }
+    }
   }
 }

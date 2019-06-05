@@ -381,13 +381,31 @@ export default class Store {
     }
   }
 
-  get (name, id = null, params = {}) {
+  /* get (name, id = null, params = {}) {
     try {
       const model = this._model(name)
       return id && this.state[model._parentKey || model.name] ? this.state[model._parentKey || model.name].find(item => item.id === id) || {}
         : this.state[model._parentKey || model.name] || []
     } catch (e) {
       throw new Error(`Cannot find model: ${name}. Please check the name or if the parent is loaded.`)
+    }
+  } */
+
+  async get (relOrObj, model) {
+    if (!this.state['entryPoint']) {
+      return
+    }
+    let link = relOrObj
+    if (typeof link === 'string') {
+      link = this.state['entryPoint']._links[link]
+    }
+    if (link) {
+      link.name = model
+      model = this._model(model)
+      const idx = this._getIndexOf(this.state[model.name], model, link)
+      if (idx !== -1) {
+        return this.state[model.name][idx]
+      }
     }
   }
 }
