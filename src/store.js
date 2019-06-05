@@ -75,12 +75,12 @@ export default class Store {
     }
   }
 
-  async getEntry (url, headers) {
+  async getEntry (headers) {
     let entry = this.state['entryPoint']
 
     if (!entry) {
       const response = await fetch(
-        url,
+        this.entryPoint,
         {
           headers: new Headers(Object.assign({}, this.defaultHeaders, headers))
         }
