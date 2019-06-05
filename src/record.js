@@ -116,4 +116,31 @@ export default class Record extends Object {
     }
     return {}
   }
+
+  async post (relOrObj, record, options) {
+    let link = relOrObj
+    if (typeof link === 'string') {
+      link = this._links[link]
+    } else if (!link) {
+      link = this._links[this._model.linkRels['post']]
+      record = this
+    }
+    if (!this._model) {
+      return {}
+    }
+    if (link) {
+      link.name = this._model.name
+      record = await this._store.create(link, record, null, Object.assign({
+          headers: {
+            Accept: link.type ? link.type : 'application/json',
+            'Content-Type': link.type ? link.type : 'application/json'
+          }
+        },
+        options
+      ))
+
+      return record
+    }
+    return {}
+  }
 }
