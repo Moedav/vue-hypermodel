@@ -144,6 +144,21 @@ export default class Store {
     }
   }
 
+  _parseUrl (url, params) {
+    if (params) {
+      let query = url + '?'
+
+      for (let pair of Object.entries(params)) {
+        if (!pair[1].includes('{')) {
+          query += `${pair[0]}=${pair[1]}&`
+        }
+      }
+
+      return query.substring(0, query.length - 1)
+    }
+    return url
+  }
+
   _findCollection (model, link) {
     for (const item of this.state[model.name]) {
       if (Array.isArray(item)) {
@@ -161,7 +176,12 @@ export default class Store {
     let model
     if (typeof nameOrObj === 'object') {
       model = this._model(nameOrObj.name)
-      url = nameOrObj.href
+      url = this._parseUrl(nameOrObj.href, Object.assign(
+        {},
+        nameOrObj.params,
+        this.defaultURLParams,
+        options.params
+      ))
       if (!options.reload) {
         const idx = this._getIndexOf(this.state[model.name], model, nameOrObj)
         if (idx !== -1) {
@@ -204,7 +224,12 @@ export default class Store {
     let model
     if (typeof nameOrObj === 'object') {
       model = this._model(nameOrObj.name)
-      url = nameOrObj.href
+      url = this._parseUrl(nameOrObj.href, Object.assign(
+        {},
+        nameOrObj.params,
+        this.defaultURLParams,
+        options.params
+      ))
     } else {
       model = this._model(nameOrObj)
       url = model.itemUrl(id, params, Object.assign({}, this.defaultURLParams, options.params))
@@ -237,7 +262,12 @@ export default class Store {
     let model
     if (typeof nameOrObj === 'object') {
       model = this._model(nameOrObj.name)
-      url = nameOrObj.href || nameOrObj.url
+      url = this._parseUrl(nameOrObj.href, Object.assign(
+        {},
+        nameOrObj.params,
+        this.defaultURLParams,
+        options.params
+      ))
     } else {
       model = this._model(nameOrObj)
       url = model.listUrl(params, options.params)
@@ -277,7 +307,12 @@ export default class Store {
     let model
     if (typeof nameOrObj === 'object') {
       model = this._model(nameOrObj.name)
-      url = nameOrObj.href || nameOrObj.url
+      url = this._parseUrl(nameOrObj.href, Object.assign(
+        {},
+        nameOrObj.params,
+        this.defaultURLParams,
+        options.params
+      ))
     } else {
       model = this._model(nameOrObj)
       url = model.itemUrl(data[model.primaryKey], params, options.params)
@@ -311,7 +346,12 @@ export default class Store {
     let collection
     if (typeof nameOrObj === 'object') {
       model = this._model(nameOrObj.name)
-      url = nameOrObj.href || nameOrObj.url
+      url = this._parseUrl(nameOrObj.href, Object.assign(
+        {},
+        nameOrObj.params,
+        this.defaultURLParams,
+        options.params
+      ))
       collection = this._findCollection(model, nameOrObj)
     } else {
       model = this._model(nameOrObj)

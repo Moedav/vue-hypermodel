@@ -10,7 +10,7 @@ export default class Collection extends Array {
     return 'application/json'
   }
 
-  async load (relOrObj, model) {
+  async load (relOrObj, model, options) {
     let link = relOrObj
     if (typeof link === 'string') {
       link = this._links[link]
@@ -18,18 +18,21 @@ export default class Collection extends Array {
     if (link) {
       link.name = model
 
-      const record = await this._store.find(link, null, {
-        headers: {
-          Accept: link.type ? link.type : 'application/json'
-        }
-      })
+      const record = await this._store.find(link, null, Object.assign({
+          headers: {
+            Accept: link.type ? link.type : 'application/json',
+            'Content-Type': link.type ? link.type : 'application/json'
+          }
+        },
+        options
+      ))
 
       return record
     }
     return {}
   }
 
-  async loadCollection (relOrObj, model) {
+  async loadCollection (relOrObj, model, options) {
     let link = relOrObj
     if (typeof link === 'string') {
       link = this._links[link]
@@ -37,11 +40,14 @@ export default class Collection extends Array {
     if (link) {
       link.name = model
 
-      const collection = await this._store.findAll(link, null, {
-        headers: {
-          Accept: link.type ? link.type : 'application/json'
-        }
-      })
+      const collection = await this._store.findAll(link, null, Object.assign({
+          headers: {
+            Accept: link.type ? link.type : 'application/json',
+            'Content-Type': link.type ? link.type : 'application/json'
+          }
+        },
+        options
+      ))
 
       return collection
     }
@@ -49,19 +55,21 @@ export default class Collection extends Array {
     return {}
   }
 
-  async create (record) {
+  async create (record, options) {
     if (!this._model) {
       return {}
     }
-    const create = this._links[this._model.linkRels['create']]
-    if (create) {
-      create.name = this._model.name
-      record = await this._store.create(create, record, null, {
-        headers: {
-          Accept: create.type ? create.type : 'application/json',
-          'Content-Type': create.type ? create.type : 'application/json'
-        }
-      })
+    const link = this._links[this._model.linkRels['create']]
+    if (link) {
+      link.name = this._model.name
+      record = await this._store.create(link, record, null, Object.assign({
+          headers: {
+            Accept: link.type ? link.type : 'application/json',
+            'Content-Type': link.type ? link.type : 'application/json'
+          }
+        },
+        options
+      ))
 
       return record
     }
