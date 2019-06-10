@@ -23,6 +23,10 @@ export default class Model {
     return undefined
   }
 
+  get link () {
+    return undefined
+  }
+
   get selfAttr () {
     return 'self'
   }

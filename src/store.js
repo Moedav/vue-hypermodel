@@ -35,7 +35,6 @@ export default class Store {
     if (!model._parent) {
       this.state[model.name] = []
     }
-
     this._models[model.name] = model
   }
 
@@ -128,7 +127,7 @@ export default class Store {
             1,
             record
           )
-          break
+          return
         }
       } else {
         const self = record[model.selfAttr]
@@ -138,7 +137,25 @@ export default class Store {
             1,
             record
           )
-          break
+          return
+        }
+      }
+    }
+    this.state[model.name].push(record)
+  }
+
+  _getRecord (collection, model, link) {
+    debugger
+    for (const [i, item] of this.state[model.name].entries()) {
+      if (Array.isArray(item)) {
+        const idx = this._getIndexOf(item, model, link)
+        if (idx !== -1) {
+          return item[idx]
+        }
+      } else {
+        const self = item[model.selfAttr]
+        if (self.href === link.href && (link.type.includes(self.type) || self.type.includes(link.type))) {
+          return this.state[model.name][i]
         }
       }
     }
@@ -175,7 +192,7 @@ export default class Store {
     let url
     let model
     if (typeof nameOrObj === 'object') {
-      model = this._model(nameOrObj.name)
+      model = nameOrObj.model
       url = this._parseUrl(nameOrObj.href, Object.assign(
         {},
         nameOrObj.params,
@@ -199,7 +216,7 @@ export default class Store {
       }
     )
 
-    let collection = new Collection(this, response)
+    let collection = new Collection()
     if (response.ok) {
       let json = await response.json()
       json = json.map(item => {
@@ -212,10 +229,13 @@ export default class Store {
         const object = json[i]
         this.setRelations(object, model, parent)
       } */
-      collection = new Collection(this, response, ...json)
+      collection = Collection.from(json)
       collection._links = parseLinks(response.headers.get('link'))
       this._setCollection(collection, model, collection[model.selfAttr] || collection._links.self)
     }
+    collection.response = response
+    collection._store = this
+    collection._model = model
     return collection
   }
 
@@ -223,18 +243,23 @@ export default class Store {
     let url
     let model
     if (typeof nameOrObj === 'object') {
-      model = this._model(nameOrObj.name)
+      model = nameOrObj.model
       url = this._parseUrl(nameOrObj.href, Object.assign(
         {},
         nameOrObj.params,
         this.defaultURLParams,
         options.params
       ))
+      if (!options.reload) {
+        const item = this._getRecord(this.state[model.name], model, nameOrObj)
+        if (item) {
+          return item
+        }
+      }
     } else {
       model = this._model(nameOrObj)
       url = model.itemUrl(id, params, Object.assign({}, this.defaultURLParams, options.params))
     }
-
     const response = await fetch(
       url,
       {
@@ -261,7 +286,7 @@ export default class Store {
     let url
     let model
     if (typeof nameOrObj === 'object') {
-      model = this._model(nameOrObj.name)
+      model = nameOrObj.model
       url = this._parseUrl(nameOrObj.href, Object.assign(
         {},
         nameOrObj.params,
@@ -306,7 +331,7 @@ export default class Store {
     let url
     let model
     if (typeof nameOrObj === 'object') {
-      model = this._model(nameOrObj.name)
+      model = nameOrObj.model
       url = this._parseUrl(nameOrObj.href, Object.assign(
         {},
         nameOrObj.params,
@@ -345,7 +370,7 @@ export default class Store {
     let model
     let collection
     if (typeof nameOrObj === 'object') {
-      model = this._model(nameOrObj.name)
+      model = nameOrObj.model
       url = this._parseUrl(nameOrObj.href, Object.assign(
         {},
         nameOrObj.params,
@@ -391,7 +416,7 @@ export default class Store {
     }
   } */
 
-  async get (relOrObj, model) {
+  get (relOrObj, model) {
     if (!this.state['entryPoint']) {
       return
     }
@@ -400,7 +425,6 @@ export default class Store {
       link = this.state['entryPoint']._links[link]
     }
     if (link) {
-      link.name = model
       model = this._model(model)
       const idx = this._getIndexOf(this.state[model.name], model, link)
       if (idx !== -1) {

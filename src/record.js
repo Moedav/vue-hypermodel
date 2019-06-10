@@ -8,13 +8,12 @@ export default class Record extends Object {
     this.isLoaded = false
   }
 
-  async load (relOrObj, model, options) {
-    let link = relOrObj
-    if (typeof link === 'string') {
-      link = this._links[link]
-    }
+  async load (model, options) {
+    // @TODO: Falls link (has Link) ansonsten dann über url laden.
+    model = this._store._model(model)
+    let link = this._links[model.link]
     if (link) {
-      link.name = model
+      link.model = model
       const record = await this._store.find(link, null, null, Object.assign({
           headers: {
             Accept: link.type ? link.type : 'application/json',
@@ -29,14 +28,11 @@ export default class Record extends Object {
     return {}
   }
 
-  async loadCollection (relOrObj, model, options) {
-    let link = relOrObj
-    if (typeof link === 'string') {
-      link = this._links[link]
-    }
+  async loadCollection (model, options) {
+    model = this._store._model(model)
+    let link = this._links[model.link]
     if (link) {
-      link.name = model
-
+      link.model = model
       const collection = await this._store.findAll(link, null, Object.assign({
           headers: {
             Accept: link.type ? link.type : 'application/json',
@@ -49,7 +45,7 @@ export default class Record extends Object {
       return collection
     }
 
-    return {}
+    return []
   }
 
   async selfLoad (options) {
@@ -58,7 +54,7 @@ export default class Record extends Object {
     }
     const self = this[this._model.selfAttr]
     if (self && !this.isLoaded) {
-      self.name = this._model.name
+      self.model = this._model
       const record = await this._store.find(self, null, null, Object.assign({
           headers: {
             Accept: self.type ? self.type : 'application/json',
@@ -81,7 +77,7 @@ export default class Record extends Object {
     }
     const link = this._links[this._model.linkRels['put']]
     if (link) {
-      link.name = this._model.name
+      link.model = this._model
       const record = await this._store.update(link, this, null, Object.assign({
           headers: {
             Accept: link.type ? link.type : 'application/json',
@@ -102,7 +98,7 @@ export default class Record extends Object {
     }
     const link = this._links[this._model.linkRels['delete']]
     if (link) {
-      link.name = this._model.name
+      link.model = this._model
       const response = await this._store.delete(link, this, null, Object.assign({
           headers: {
             Accept: link.type ? link.type : 'application/json',
@@ -129,7 +125,7 @@ export default class Record extends Object {
       return {}
     }
     if (link) {
-      link.name = this._model.name
+      link.model = this._model
       record = await this._store.create(link, record, null, Object.assign({
           headers: {
             Accept: link.type ? link.type : 'application/json',
