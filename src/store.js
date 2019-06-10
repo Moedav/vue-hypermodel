@@ -145,7 +145,6 @@ export default class Store {
   }
 
   _getRecord (collection, model, link) {
-    debugger
     for (const [i, item] of this.state[model.name].entries()) {
       if (Array.isArray(item)) {
         const idx = this._getIndexOf(item, model, link)
