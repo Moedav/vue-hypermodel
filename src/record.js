@@ -64,8 +64,6 @@ export default class Record extends Object {
         options
       ))
 
-      record.isLoaded = true
-
       return record
     }
     return {}

@@ -135,7 +135,7 @@ export default class Model {
           urlObj = new URL(json[meta.attribute].href)
           qry = qs.parse(urlObj.search.substring(1))
 
-          obj[json[meta.attribute].rel] = Object.assign(json[meta.attribute], {
+          obj[json[meta.attribute].rel] = Object.assign({}, json[meta.attribute], {
             href: urlObj.origin + urlObj.pathname,
             link: json[meta.attribute].href,
             params: qry
@@ -155,7 +155,7 @@ export default class Model {
           urlObj = new URL(json[meta.attribute].href)
           qry = qs.parse(urlObj.search.substring(1))
 
-          obj[json[meta.attribute].rel] = Object.assign(json[meta.attribute], {
+          obj[json[meta.attribute].rel] = Object.assign({}, json[meta.attribute], {
             href: urlObj.origin + urlObj.pathname,
             link: json[meta.attribute].href,
             params: qry

@@ -272,7 +272,7 @@ export default class Store {
       ))
       if (!options.reload) {
         const item = this._getRecord(this.state[model.name], model, nameOrObj)
-        if (item) {
+        if (item && item.isLoaded) {
           return item
         }
       }
@@ -296,6 +296,7 @@ export default class Store {
       */
       record = Object.assign(record, json)
       record._links = Object.assign(record._links, parseLinks(response.headers.get('link')))
+      record.isLoaded = true
       this._setRecord(record, model, record[model.selfAttr] || record._links.self)
     }
 
