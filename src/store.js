@@ -445,7 +445,7 @@ export default class Store {
     if (params.link) {
       const item = this._getRecord(this.state[model.name], model, params.link) || this._get(this.state[model.name], model, params.link)
       if (item) {
-        return itemd
+        return item
       } else {
         return
       }
