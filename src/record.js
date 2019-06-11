@@ -139,4 +139,12 @@ export default class Record extends Object {
     }
     return {}
   }
+
+  get (model) {
+    model = this._store._model(model)
+    let link = this._links[model.link]
+    if (link) {
+      return this._store.get(model.name, { link })
+    }
+  }
 }

@@ -144,6 +144,15 @@ export default class Store {
     this.state[model.name].push(record)
   }
 
+  _get (collection, model, link) {
+    for (const [i, item] of this.state[model.name].entries()) {
+      const self = item[model.selfAttr] || item._links.self
+      if (self.href === link.href && (link.type.includes(self.type) || self.type.includes(link.type))) {
+        return item
+      }
+    }
+  }
+
   _getRecord (collection, model, link) {
     for (const [i, item] of this.state[model.name].entries()) {
       if (Array.isArray(item)) {
@@ -155,6 +164,18 @@ export default class Store {
         const self = item[model.selfAttr]
         if (self.href === link.href && (link.type.includes(self.type) || self.type.includes(link.type))) {
           return this.state[model.name][i]
+        }
+      }
+    }
+  }
+
+  _getRecordById (collection, model, id) {
+    for (const [i, item] of this.state[model.name].entries()) {
+      if (Array.isArray(item)) {
+        return item.find(rec => rec[model.primaryKey] === id)
+      } else {
+        if (item[model.primaryKey] === id) {
+          return item
         }
       }
     }
@@ -390,14 +411,15 @@ export default class Store {
         const idx = this._getIndexOf(collection, model, nameOrObj)
         collection.splice(idx, 1)
       } else {
-        const idx = this.state[model._parentKey || model.name].findIndex(item => item[model.primaryKey] === id)
-        /*if (idx >= 0) {
+        const item = this._getRecord(this.state[model.name], model, nameOrObj)
+        // @Todo: Item muss noch aus Liste gelöscht werden
+        /* if (idx >= 0) {
           this.setRelations(parent[model._parentKey || model.name][idx], model, parent, false, true)
-        }*/
-        this.state[model._parentKey || model.name].splice(
+        } */
+        /* this.state[model._parentKey || model.name].splice(
           idx,
           1
-        )
+        ) */
       }
       return response
     } else {
@@ -415,20 +437,30 @@ export default class Store {
     }
   } */
 
-  get (relOrObj, model) {
-    if (!this.state['entryPoint']) {
+  get (model, params = {}) {
+    model = this._model(model)
+    if (!this.state['entryPoint'] || !model) {
       return
     }
-    let link = relOrObj
-    if (typeof link === 'string') {
-      link = this.state['entryPoint']._links[link]
-    }
-    if (link) {
-      model = this._model(model)
-      const idx = this._getIndexOf(this.state[model.name], model, link)
-      if (idx !== -1) {
-        return this.state[model.name][idx]
+    if (params.link) {
+      const item = this._getRecord(this.state[model.name], model, params.link) || this._get(this.state[model.name], model, params.link)
+      if (item) {
+        return itemd
+      } else {
+        return
       }
+    }
+    if (params.id) {
+      const item = this._getRecordById(this.state[model.name], model, params.id)
+      if (item) {
+        return item
+      } else {
+        return
+      }
+    }
+    const idx = this._getIndexOf(this.state[model.name], model, model.link)
+    if (idx !== -1) {
+      return this.state[model.name][idx]
     }
   }
 }
