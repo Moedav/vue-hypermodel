@@ -251,7 +251,9 @@ export default class Store {
       } */
       collection = Collection.from(json)
       collection._links = parseLinks(response.headers.get('link'))
-      this._setCollection(collection, model, collection[model.selfAttr] || collection._links.self)
+      if (!options['no-store']) {
+        this._setCollection(collection, model, collection[model.selfAttr] || collection._links.self)
+      }
     }
     collection.response = response
     collection._store = this
@@ -297,7 +299,9 @@ export default class Store {
       record = Object.assign(record, json)
       record._links = Object.assign(record._links, parseLinks(response.headers.get('link')))
       record.isLoaded = true
-      this._setRecord(record, model, record[model.selfAttr] || record._links.self)
+      if (!options['no-store']) {
+        this._setRecord(record, model, record[model.selfAttr] || record._links.self)
+      }
     }
 
     return record
