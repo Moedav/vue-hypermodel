@@ -309,6 +309,7 @@ export default class Store {
       if (!options['no-store']) {
         this._setRecord(record, model, record[model.selfAttr] || record._links.self)
       }
+      return record
     } else if (this._errorHandler[response.status]) {
       this._errorHandler[response.status](response, this, model)
     }

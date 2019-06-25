@@ -239,7 +239,7 @@ export default class Model {
     return new DatetimeTransformer(defaultValue)
   }
 
-  link (defaultValue) {
+  http (defaultValue) {
     return new UrlTransformer(defaultValue)
   }
 
