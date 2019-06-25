@@ -11,6 +11,7 @@ export default class Store {
       'Content-Type': 'application/json'
     }
     this.defaultURLParams = {}
+    this._errorHandler = {}
     this.entryPoint = null
 
     if (typeof window !== 'undefined' && window.Vue) {
@@ -40,6 +41,10 @@ export default class Store {
 
   addAction (name, func) {
     this.actions[name] = func
+  }
+
+  setGlobalErrorHandler (object) {
+    this._errorHandler = object
   }
 
   call (name, options) {
@@ -236,7 +241,6 @@ export default class Store {
       }
     )
 
-    let collection = new Collection()
     if (response.ok) {
       let json = await response.json()
       json = json.map(item => {
@@ -249,16 +253,19 @@ export default class Store {
         const object = json[i]
         this.setRelations(object, model, parent)
       } */
-      collection = Collection.from(json)
+      const collection = Collection.from(json)
       collection._links = parseLinks(response.headers.get('link'))
       if (!options['no-store']) {
         this._setCollection(collection, model, collection[model.selfAttr] || collection._links.self)
       }
+      collection.response = response
+      collection._store = this
+      collection._model = model
+      return collection
+    } else if (this._errorHandler[response.status]) {
+      this._errorHandler[response.status](response, this, model)
     }
-    collection.response = response
-    collection._store = this
-    collection._model = model
-    return collection
+    throw response
   }
 
   async find (nameOrObj, id, params = {}, options = {}) {
@@ -289,22 +296,23 @@ export default class Store {
       }
     )
 
-    let record = new Record(this, response, model.name)
     if (response.ok) {
       let json = await response.json()
       json = model.deserialize(json)
       /*
             this.setRelations(json, model, parent)
       */
+      let record = new Record(this, response, model.name)
       record = Object.assign(record, json)
       record._links = Object.assign(record._links, parseLinks(response.headers.get('link')))
       record.isLoaded = true
       if (!options['no-store']) {
         this._setRecord(record, model, record[model.selfAttr] || record._links.self)
       }
+    } else if (this._errorHandler[response.status]) {
+      this._errorHandler[response.status](response, this, model)
     }
-
-    return record
+    throw response
   }
 
   async create (nameOrObj, data = {}, params = {}, options = {}) {
@@ -339,9 +347,10 @@ export default class Store {
       this._setRecord(record, model, record[model.selfAttr] || record._links.self)
 
       return record
-    } else {
-      throw record
+    } else if (this._errorHandler[response.status]) {
+      this._errorHandler[response.status](response, this, model)
     }
+    throw response
   }
 
   new (name, data = {}) {
@@ -385,9 +394,10 @@ export default class Store {
       this._setRecord(record, model, record[model.selfAttr] || record._links.self)
 
       return record
-    } else {
-      throw record
+    } else if (this._errorHandler[response.status]) {
+      this._errorHandler[response.status](response, this, model)
     }
+    throw response
   }
 
   async delete (nameOrObj, record, params = {}, options = {}) {
@@ -427,9 +437,10 @@ export default class Store {
         ) */
       }
       return response
-    } else {
-      throw response
+    } else if (this._errorHandler[response.status]) {
+      this._errorHandler[response.status](response, this, model)
     }
+    throw response
   }
 
   /* get (name, id = null, params = {}) {
