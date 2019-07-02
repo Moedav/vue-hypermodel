@@ -93,6 +93,8 @@ export default class Store {
       if (response.ok) {
         record._links = Object.assign(record._links, parseLinks(response.headers.get('link')))
         this.state['entryPoint'] = record
+      } else {
+        throw response
       }
 
       return record
