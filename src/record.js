@@ -53,7 +53,7 @@ export default class Record extends Object {
       return {}
     }
     const self = this[this._model.selfAttr]
-    if (self && !this.isLoaded) {
+    if (self) {
       self.model = this._model
       const record = await this._store.find(self, null, null, Object.assign({
           headers: {
