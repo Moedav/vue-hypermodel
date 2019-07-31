@@ -2,8 +2,7 @@ import Transformer from './transformer'
 
 export default class LinkObjTransformer extends Transformer {
   serialize (value) {
-    value = super.serialize(value)
-    return value
+    return null
   }
 
   deserialize (value) {
