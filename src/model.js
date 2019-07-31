@@ -132,6 +132,9 @@ export default class Model {
           }
           break
         case 'hasManyLink':
+          if (!json[meta.attribute]) {
+            break
+          }
           urlObj = new URL(json[meta.attribute].href)
           qry = qs.parse(urlObj.search.substring(1))
 
@@ -152,6 +155,9 @@ export default class Model {
           }
           break
         case 'hasLink':
+          if (!json[meta.attribute]) {
+            break
+          }
           urlObj = new URL(json[meta.attribute].href)
           qry = qs.parse(urlObj.search.substring(1))
 
