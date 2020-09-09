@@ -151,6 +151,30 @@ export default class Store {
     this.state[model.name].push(record)
   }
 
+  _deleteRecord (record, model, link) {
+    for (const [i, item] of this.state[model.name].entries()) {
+      if (Array.isArray(item)) {
+        const idx = this._getIndexOf(item, model, link)
+        if (idx !== -1) {
+          item.splice(
+            idx,
+            1
+          )
+          return
+        }
+      } else {
+        const self = record[model.selfAttr]
+        if (self.href === link.href && (link.type.includes(self.type) || self.type.includes(link.type))) {
+          this.state[model.name].splice(
+            i,
+            1
+          )
+          return
+        }
+      }
+    }
+  }
+
   _get (collection, model, link) {
     for (const [i, item] of this.state[model.name].entries()) {
       const self = item[model.selfAttr] || item._links.self
@@ -340,16 +364,21 @@ export default class Store {
     })
     let record = new Record(this, response, model.name)
     if (response.ok) {
-      let json = await response.json()
-      json = model.deserialize(json)
-      /*
-            this.setRelations(json, model, parent)
-      */
-      record = Object.assign(record, json)
-      record._links = Object.assign(record._links, parseLinks(response.headers.get('link')))
-      this._setRecord(record, model, record[model.selfAttr] || record._links.self)
+      const text = await response.text()
+      if (text) {
+        let json = await response.json()
+        json = model.deserialize(json)
+        /*
+              this.setRelations(json, model, parent)
+        */
+        record = Object.assign(record, json)
+        record._links = Object.assign(record._links, parseLinks(response.headers.get('link')))
+        this._setRecord(record, model, record[model.selfAttr] || record._links.self)
 
-      return record
+        return record
+      } else {
+        return response
+      }
     } else if (this._errorHandler[response.status]) {
       this._errorHandler[response.status](response, this, model)
     }
@@ -430,14 +459,7 @@ export default class Store {
         collection.splice(idx, 1)
       } else {
         const item = this._getRecord(this.state[model.name], model, nameOrObj)
-        // @Todo: Item muss noch aus Liste gelöscht werden
-        /* if (idx >= 0) {
-          this.setRelations(parent[model._parentKey || model.name][idx], model, parent, false, true)
-        } */
-        /* this.state[model._parentKey || model.name].splice(
-          idx,
-          1
-        ) */
+        this._deleteRecord(item, model, nameOrObj)
       }
       return response
     } else if (this._errorHandler[response.status]) {
