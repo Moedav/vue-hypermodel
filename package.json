@@ -1,6 +1,6 @@
 {
   "name": "vue-hypermodel",
-  "version": "1.3.7",
+  "version": "1.3.8",
   "description": "Do it right or how you like!",
   "main": "src/index.js",
   "author": "David Mödl",
