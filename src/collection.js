@@ -20,7 +20,14 @@ Array.prototype.load = async function (relOrObj, model, options) {
 
 Array.prototype.loadCollection = async function (relOrObj, model, options) {
   model = this._store._model(model)
-  let link = this._links[model.link]
+
+  let link
+  if (typeof relOrObj === 'object') {
+    link = relOrObj
+  } else {
+    link = relOrObj ? this._links[relOrObj] : this._links[model.link]
+  }
+
   if (link) {
     link.model = model
 
