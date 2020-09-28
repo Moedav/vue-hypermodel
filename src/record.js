@@ -120,7 +120,7 @@ export default class Record extends Object {
       record = this
     }
     if (link) {
-      link.model = model || this._model
+      link.model = this._store._model(model) || this._model
       record = await this._store.create(link, record, null, Object.assign({
           headers: {
             Accept: link.type ? link.type : 'application/json',
