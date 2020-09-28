@@ -377,7 +377,8 @@ export default class Store {
 
         return record
       } else {
-        return response
+        record._links = Object.assign(record._links, parseLinks(response.headers.get('link')))
+        return record
       }
     } else if (this._errorHandler[response.status]) {
       this._errorHandler[response.status](response, this, model)
