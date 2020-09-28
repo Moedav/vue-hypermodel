@@ -111,7 +111,7 @@ export default class Record extends Object {
     return {}
   }
 
-  async post (relOrObj, record, options) {
+  async post (relOrObj, record, model = null, options = {}) {
     let link = relOrObj
     if (typeof link === 'string') {
       link = this._links[link]
@@ -119,11 +119,8 @@ export default class Record extends Object {
       link = this._links[this._model.linkRels['post']]
       record = this
     }
-    if (!this._model) {
-      return {}
-    }
     if (link) {
-      link.model = this._model
+      link.model = model || this._model
       record = await this._store.create(link, record, null, Object.assign({
           headers: {
             Accept: link.type ? link.type : 'application/json',
