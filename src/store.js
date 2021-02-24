@@ -217,7 +217,9 @@ export default class Store {
       let query = url + '?'
 
       for (let pair of Object.entries(params)) {
-        if (!!pair[1] && !pair[1].includes('{')) {
+        if (typeof pair[1] === 'string' && !pair[1].includes('{')) {
+          query += `${pair[0]}=${pair[1]}&`
+        } else if (typeof pair[1] !== 'string') {
           query += `${pair[0]}=${pair[1]}&`
         }
       }
